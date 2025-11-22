@@ -20,7 +20,7 @@ import json
 
 PLUGIN_ID = 'tools'
 PLUGIN_NAME = 'Tools'
-VERSION = '1.0.0'
+VERSION = '1.0.2'
 
 def on_load(server: PluginServerInterface, prev_module):
     loaded = server.load_config_simple(
