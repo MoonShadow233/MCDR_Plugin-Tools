@@ -217,13 +217,17 @@ class Position:
         self.server = server
         pass
     
-    
+
+            
             
     def set_position(self, info: Info ,name: str):
+        
         """
         设置传送位置
         :param info: 服务器信息对象
         """
+        if not info.is_player or not info.content.startswith('!d'):
+            return
         if not info.is_player:
             return
         if not self.Authentication(info):
