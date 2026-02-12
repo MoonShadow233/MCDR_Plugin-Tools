@@ -106,7 +106,8 @@ class ButtonManager:
             value=command,
             color=color,
             bold=bold,
-            hover_text=hover_text
+            hover_text=hover_text,
+            button_id=button_id
         )
     
     def create_button_simple(
