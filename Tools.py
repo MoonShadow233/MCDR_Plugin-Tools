@@ -109,7 +109,8 @@ def command(server: PluginServerInterface, info: Info):
 
     if settings.get('enable_music', True):
         Music(server, info).PlayMusic()
-    
+    if settings.get('enable_position', True):
+            Position(server).set_position(info)
     ChatEvent(server, info).help()
 
 class Config(Serializable):
@@ -134,7 +135,7 @@ class Config(Serializable):
 
     }
     Position: dict = {
-        "例子": {
+        "name": {
             "location": "0 64 0",
             "dimension": "0",
             "by": "player"
@@ -148,7 +149,7 @@ def conf(server: PluginServerInterface):
         target_class=Config  #用Serializable
     )
     settings = config.settings
-
+    positions = config.Position
 
 class Here:
     def __init__(self, server: PluginServerInterface, info:Info):
@@ -208,16 +209,27 @@ class Kill:
 class Position:
     def __init__(self, server: PluginServerInterface):
         self.server = server
-        pass
     
-
-    def getpositionlist(self):        
-        positions = self.server.load_config_simple('config.json', default={'saved_positions': {}}).get('saved_positions', {})
+    def _load_config(self):
+        """加载配置文件"""
+        return self.server.load_config_simple('config.json')
+    
+    def _save_config(self, config_data):
+        """保存配置文件"""
+        self.server.save_config_simple(config_data, 'config.json')
+    
+    def getpositionlist(self, info: Info):
+        """获取所有保存的位置列表"""
+        config_data = self._load_config()
+        positions = config_data.get('Position', {})
+        
         if not positions:
-            ChatEvent(self.server, info, type="info", msg='§c没有保存的传送位置！', log='没有保存的传送位置', say=True).guide()
+            ChatEvent(self.server, info, type="info", 
+                     msg='§c没有保存的传送位置！', 
+                     log='没有保存的传送位置', 
+                     say=True).guide()
             return
         
-        # 每页5行，分页输出
         page_size = 5
         items = list(positions.items())
         total_pages = (len(items) + page_size - 1) // page_size
@@ -227,45 +239,206 @@ class Position:
             start = page * page_size
             end = start + page_size
             for name, data in items[start:end]:
-                message += f'§6{name} §a- §2{data["location"]} §a- §4{data["dimension"]} §a- §c{data["set_by"]}\n'
-            ChatEvent(self.server, info, type="info", msg=message, log=f"获取传送位置列表第{page + 1}页", say=True).guide()
-        
-        return positions
+                location = data.get('location', '?')
+                dimension = data.get('dimension', '?')
+                by = data.get('by', '?')
+                # 维度数字转文字
+                dim_text = self._dimension_to_text(dimension)
+                message += f'§6{name} §a- §2{location} §a- §4{dim_text} §a- §c{by}\n'
+            ChatEvent(self.server, info, type="info", 
+                     msg=message, 
+                     log=f"获取传送位置列表第{page + 1}页", 
+                     say=True).guide()
     
-    def set_position(self, info: Info ,name: str):
-        
+    def posdebug(self, info: Info):
+        """显示帮助信息"""
+        ChatEvent(self.server, info, type="info", msg=(
+            '§c语法错误！正确语法：!d tp <位置名称> | !d set <位置名称> | !d list\n'
+            '§c- !d set <名称> : 保存当前位置\n'
+            '§c- !d tp <名称> : 传送到保存的位置\n'
+            '§c- !d list : 查看所有保存的位置'
+        ), log=None, say=False).guide()
+    
+    def set_position(self, info: Info):
         """
-        设置传送位置
+        设置/传送位置主方法
         :param info: 服务器信息对象
         """
         if not info.is_player or not info.content.startswith('!d'):
             return
-        if not info.is_player:
-            return
-        if not self.Authentication(info):
-            return
+        
         args = info.content.split()
-        if len(args) != 2:
-            self.tpdebug(info)
+        if len(args) < 2:
+            self.posdebug(info)
             return
-        location = args[1]
-        dimension = self.server.get_plugin_instance('minecraft_data_api').get_player_dimension(info.player)
-        by = info.player
-        self.server.execute(f'tp {by} {location} {dimension}')
         
-        # 将位置写入 config.json
-        config = self.server.load_config_simple('config.json', default={'saved_positions': {}})
-        saved_positions = config.setdefault('saved_positions', {})
-        saved_positions[name] = {
-            'location': location,
-            'dimension': dimension,
-            'set_by': by
-        }
-        self.server.save_config_simple(config, 'config.json')
+        mode = args[1]
         
-        ChatEvent(self.server, info, type="info", msg=f'§a已将 {name} 的传送位置设置为 {location} {dimension}', log=f"玩家 {by} 设置传送位置为 {location} {dimension}", say=True).guide()
-        return
+        if mode == 'tp':
+            self._teleport_to_position(info, args)
+        elif mode == 'set':
+            self.set_location(info)
+        elif mode == 'list':
+            self.getpositionlist(info)
+        else:
+            self.posdebug(info)
     
+    def _teleport_to_position(self, info: Info, args: list):
+        """传送到保存的位置"""
+        if len(args) < 3:
+            self.posdebug(info)
+            return
+        
+        location_name = args[2]
+        
+        try:
+            config_data = self._load_config()
+            position_data = config_data.get('Position', {}).get(location_name, {})
+            
+            if not position_data:
+                ChatEvent(self.server, info, type="error", 
+                         msg=f'§c未找到位置 "{location_name}"！', 
+                         log=f'未找到传送位置: {location_name}', 
+                         say=True).guide()
+                return
+            
+            pos_str = position_data.get('location')
+            dimension_id = position_data.get('dimension')
+            
+            if not pos_str or dimension_id is None:
+                ChatEvent(self.server, info, type="error", 
+                         msg='§c位置数据损坏！', 
+                         log='位置数据损坏', 
+                         say=True).guide()
+                return
+            
+            # 维度转换
+            dimension = self._dimension_to_command(dimension_id)
+            
+            # 执行传送
+            self.server.execute(f'execute in {dimension} run tp {info.player} {pos_str}')
+            
+            dim_text = self._dimension_to_text(dimension_id)
+            ChatEvent(self.server, info, type="info", 
+                     msg=f'§a已将你传送到 §6{location_name} §a({dim_text})', 
+                     log=f"玩家 {info.player} 传送到 {location_name}", 
+                     say=True).guide()
+            
+        except Exception as e:
+            ChatEvent(self.server, info, type="error", 
+                     msg=f'§c传送时发生错误: {str(e)}', 
+                     log=f'传送错误: {e}', 
+                     say=True).guide()
+    
+    @new_thread("SetPosition")
+    def set_location(self, info: Info):
+        """保存当前位置"""
+        args = info.content.split()
+        if len(args) < 3:
+            self.posdebug(info)
+            return
+        
+        name = args[2]
+        
+        # 检查名称是否已存在
+        config_data = self._load_config()
+        if name in config_data.get('Position', {}):
+            ChatEvent(self.server, info, type="error", 
+                     msg=f'§c位置 "{name}" 已存在！请使用其他名称', 
+                     log=f'位置名称已存在: {name}', 
+                     say=True).guide()
+            return
+        
+        # 获取坐标
+        api = self.server.get_plugin_instance('minecraft_data_api')
+        if api is None:
+            ChatEvent(self.server, info, type="error", 
+                     msg='§cMinecraft Data API未启用！', 
+                     log='Minecraft Data API 未启用', 
+                     say=False).guide()
+            return
+        
+        try:
+            # 获取玩家维度和坐标
+            dimension = api.get_player_dimension(info.player)
+            location = api.get_player_coordinate(info.player)
+            
+            # 四舍五入坐标
+            x = round(location.x)
+            y = round(location.y)
+            z = round(location.z)
+            pos_str = f"{x} {y} {z}"
+            
+            # 保存到配置
+            config_data.setdefault('Position', {})
+            config_data['Position'][name] = {
+                'location': pos_str,
+                'dimension': dimension,
+                'by': info.player,
+                'time': time.strftime('%Y-%m-%d %H:%M:%S')  # 添加时间戳
+            }
+            
+            self._save_config(config_data)
+            
+            dim_text = self._dimension_to_text(dimension)
+            ChatEvent(self.server, info, type="info", 
+                     msg=f'§a已保存位置 §6{name} §a: §e{x} {y} {z} §a在 §d{dim_text}', 
+                     log=f"玩家 {info.player} 保存位置 {name} [{x} {y} {z}]", 
+                     say=True).guide()
+            
+        except Exception as e:
+            ChatEvent(self.server, info, type="error", 
+                     msg=f'§c保存位置时发生错误: {str(e)}', 
+                     log=f'保存位置错误: {e}', 
+                     say=False).guide()
+    
+    def _dimension_to_text(self, dimension_id):
+        """维度ID转显示文本"""
+        dimension_map = {
+            0: '主世界',
+            -1: '下界',
+            1: '末地',
+            '0': '主世界',
+            '-1': '下界',
+            '1': '末地'
+        }
+        return dimension_map.get(dimension_id, f'未知({dimension_id})')
+    
+    def _dimension_to_command(self, dimension_id):
+        """维度ID转命令维度名"""
+        dimension_map = {
+            0: 'minecraft:overworld',
+            -1: 'minecraft:the_nether',
+            1: 'minecraft:the_end',
+            '0': 'minecraft:overworld',
+            '-1': 'minecraft:the_nether',
+            '1': 'minecraft:the_end'
+        }
+        return dimension_map.get(dimension_id, 'minecraft:overworld')
+    
+    def delete_position(self, info: Info, name: str):
+        """删除保存的位置（需要权限）"""
+        perm = self.server.get_permission_level(info.player)
+        if perm < 3:
+            ChatEvent(self.server, info, type="error", 
+                     msg='§c你没有权限删除位置！', 
+                     log='权限不足', 
+                     say=False).guide()
+            return
+        
+        config_data = self._load_config()
+        if name in config_data.get('Position', {}):
+            del config_data['Position'][name]
+            self._save_config(config_data)
+            ChatEvent(self.server, info, type="info", 
+                     msg=f'§a已删除位置 §6{name}', 
+                     log=f"玩家 {info.player} 删除位置 {name}", 
+                     say=True).guide()
+        else:
+            ChatEvent(self.server, info, type="error", 
+                     msg=f'§c未找到位置 "{name}"！', 
+                     log=f'删除失败，位置不存在: {name}', 
+                     say=True).guide()
 
 
 
