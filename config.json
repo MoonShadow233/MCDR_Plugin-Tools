@@ -9,9 +9,20 @@
         "enable_manyplayer": true,
         "enable_betterchat": true,
         "enable_scale": true,
-        "enable_tools": false
+        "enable_tools": false,
+        "enable_position": true,
+        "max_position": 100,
+        "position_permission_level": 2
     },
     "message": {
         "welcome_message": "§c欢迎 §a{player} §c加入游戏！"
+    },
+    "Position": {
+        "例子": {
+            "location": "0 64 0",
+            "dimension": "0",
+            "by": "player"
+            
+        }
     }
 }
