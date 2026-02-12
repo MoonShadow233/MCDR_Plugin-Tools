@@ -833,5 +833,101 @@ def restart_server_dialog(server: PluginServerInterface, source: CommandSource):
     
     show_confirm_dialog(server, source.player, '§c确定要重启服务器吗？', do_restart)
 
+
+# ============================================================================
+#                              ListDisplay 列表显示示例
+# ============================================================================
+
+from api import ListDisplay, show_list
+
+# 1. 基础用法：显示简单字符串列表
+def show_simple_list(server: PluginServerInterface, source: CommandSource):
+    items = ['苹果', '香蕉', '橙子', '葡萄', '西瓜', '草莓', '蓝莓', '芒果']
+    
+    def on_select(src, index, item):
+        src.reply(f'§a你选择了第 {index + 1} 项: {item}')
+    
+    ListDisplay(server, items, title='水果列表', page_size=4) \
+        .on_select(on_select) \
+        .show_to(source.player)
+
+# 2. 自定义按钮文本和颜色
+def show_custom_button_list(server: PluginServerInterface, source: CommandSource):
+    items = ['钻石剑', '铁剑', '石剑', '木剑']
+    
+    def on_select(src, index, item):
+        src.reply(f'§e你选择了武器: {item}')
+    
+    ListDisplay(server, items, title='武器选择', page_size=3) \
+        .on_select(on_select) \
+        .with_button('[装备]', 'green') \
+        .show_to(source.player)
+
+# 3. 不显示按钮（仅展示列表）
+def show_info_list(server: PluginServerInterface, source: CommandSource):
+    items = ['服务器版本: 1.20.4', '在线玩家: 5', '服务器TPS: 20.0', '运行时间: 2小时']
+    
+    ListDisplay(server, items, title='服务器信息', page_size=5) \
+        .without_button() \
+        .show_to(source.player)
+
+# 4. 自定义格式化函数（显示字典数据）
+def show_player_list(server: PluginServerInterface, source: CommandSource):
+    players = [
+        {'name': 'Steve', 'score': 100, 'level': 10},
+        {'name': 'Alex', 'score': 85, 'level': 8},
+        {'name': 'Notch', 'score': 200, 'level': 15},
+        {'name': 'Herobrine', 'score': 999, 'level': 99},
+    ]
+    
+    def format_player(item, idx):
+        return f"{item['name']} - 分数: {item['score']} 等级: {item['level']}"
+    
+    def on_select(src, index, item):
+        src.reply(f'§a你选择了玩家: {item["name"]}')
+        server.execute(f'tp {src.player} {item["name"]}')
+    
+    ListDisplay(server, players, title='玩家排行榜', page_size=3, item_format=format_player) \
+        .on_select(on_select) \
+        .with_button('[传送]', 'aqua') \
+        .with_colors(header='gold', item='yellow', index='gray') \
+        .show_to(source.player)
+
+# 5. 使用快捷函数 show_list
+def show_quick_list(server: PluginServerInterface, source: CommandSource):
+    items = ['选项A', '选项B', '选项C', '选项D']
+    
+    show_list(
+        server=server,
+        items=items,
+        target=source.player,
+        title='快速选择',
+        page_size=5,
+        on_select=lambda src, idx, item: src.reply(f'选择: {item}'),
+        button_text='[确定]',
+        button_color='green'
+    )
+
+# 6. 传送点列表示例
+def show_warp_list(server: PluginServerInterface, source: CommandSource):
+    warps = [
+        {'name': '主城', 'x': 0, 'y': 64, 'z': 0},
+        {'name': '矿场', 'x': 500, 'y': 45, 'z': 500},
+        {'name': '农场', 'x': -200, 'y': 64, 'z': 300},
+        {'name': '末地传送门', 'x': 1000, 'y': 30, 'z': 1000},
+    ]
+    
+    def format_warp(item, idx):
+        return f"{item['name']} ({item['x']}, {item['y']}, {item['z']})"
+    
+    def on_warp_select(src, index, item):
+        server.execute(f'tp {src.player} {item["x"]} {item["y"]} {item["z"]}')
+        src.reply(f'§a已传送到: {item["name"]}')
+    
+    ListDisplay(server, warps, title='传送点列表', page_size=5, item_format=format_warp) \
+        .on_select(on_warp_select) \
+        .with_button('[传送]', 'aqua') \
+        .show_to(source.player)
+
 ================================================================================
 """
