@@ -212,6 +212,47 @@ class Kill:
             self.server.execute(f'kill {player_name}')
             ChatEvent(self.server, info, type="info", msg=f'欸 {player_name} 你怎么似了啊？！', log=f"玩家 {player_name} 自杀", say=True).guide()
 
+class Position:
+    def __init__(self, server: PluginServerInterface):
+        self.server = server
+        pass
+    
+    
+            
+    def set_position(self, info: Info ,name: str):
+        """
+        设置传送位置
+        :param info: 服务器信息对象
+        """
+        if not info.is_player:
+            return
+        if not self.Authentication(info):
+            return
+        args = info.content.split()
+        if len(args) != 2:
+            self.tpdebug(info)
+            return
+        location = args[1]
+        dimension = self.server.get_plugin_instance('minecraft_data_api').get_player_dimension(info.player)
+        by = info.player
+        self.server.execute(f'tp {by} {location} {dimension}')
+        
+        # 将位置写入 config.json
+        config = self.server.load_config_simple('config.json', default={'saved_positions': {}})
+        saved_positions = config.setdefault('saved_positions', {})
+        saved_positions[name] = {
+            'location': location,
+            'dimension': dimension,
+            'set_by': by
+        }
+        self.server.save_config_simple(config, 'config.json')
+        
+        ChatEvent(self.server, info, type="info", msg=f'§a已将 {name} 的传送位置设置为 {location} {dimension}', log=f"玩家 {by} 设置传送位置为 {location} {dimension}", say=True).guide()
+        return
+    
+
+
+
 class GamemodeTp():
     """
     旁观模式传送类
