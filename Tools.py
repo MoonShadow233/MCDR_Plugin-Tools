@@ -218,8 +218,27 @@ class Position:
         pass
     
 
-            
-            
+    def getpositionlist(self):        
+        positions = self.server.load_config_simple('config.json', default={'saved_positions': {}}).get('saved_positions', {})
+        if not positions:
+            ChatEvent(self.server, info, type="info", msg='§c没有保存的传送位置！', log='没有保存的传送位置', say=True).guide()
+            return
+        
+        # 每页5行，分页输出
+        page_size = 5
+        items = list(positions.items())
+        total_pages = (len(items) + page_size - 1) // page_size
+        
+        for page in range(total_pages):
+            message = f'§a保存的传送位置有（第 {page + 1}/{total_pages} 页）：\n'
+            start = page * page_size
+            end = start + page_size
+            for name, data in items[start:end]:
+                message += f'§6{name} §a- §2{data["location"]} §a- §4{data["dimension"]} §a- §c{data["set_by"]}\n'
+            ChatEvent(self.server, info, type="info", msg=message, log=f"获取传送位置列表第{page + 1}页", say=True).guide()
+        
+        return positions
+    
     def set_position(self, info: Info ,name: str):
         
         """
