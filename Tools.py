@@ -61,41 +61,6 @@ def on_load(server: PluginServerInterface, prev_module):
         return
     server.logger.info(f'{PLUGIN_NAME} 插件 加载成功 版本: {VERSION}')
 
-def conf(server: PluginServerInterface):
-    DefauleConf = {
-    "settings": {
-        "enable_here": true,
-        "enable_kill": true,
-        "enable_tp": true,
-        "enable_restart": true,
-        "enable_random": true,
-        "enable_fakeplayer": true,
-        "enable_manyplayer": true,
-        "enable_betterchat": true,
-        "enable_scale": true,
-        "enable_tools": false,
-        "enable_position": true,
-        "max_position": 100,
-        "position_permission_level": 2
-    },
-    "message": {
-        "welcome_message": "§c欢迎 §a{player} §c加入游戏！"
-    },
-    "Position": {
-        "例子": {
-            "location": "0 64 0",
-            "dimension": "0",
-            "by": "player"
-            
-        }
-    }
-}
-    conf.config = server.load_config_simple(
-        'config.json',
-        DefauleConf
-    )
-    global settings
-    settings = conf.config.get('settings', DefauleConf['settings'])
 
 def on_unload(server: PluginServerInterface):
     ChatEvent(server, None, type="info", msg='插件已卸载', log='插件已卸载', say=False).guide()
@@ -159,12 +124,31 @@ class Config(Serializable):
         'enable_betterchat': True,
         'enable_scale': True,
         'enable_itemhighlight': True,
-        'enable_tools': False
+        'enable_tools': False,
+        'enable_position': True,
+        "max_position": 100,
+        "position_permission_level": 2
     }
     message: dict = {
         'welcome_message': '§c欢迎 §a{player} §c加入游戏！'
 
     }
+    Position: dict = {
+        "例子": {
+            "location": "0 64 0",
+            "dimension": "0",
+            "by": "player"
+        }
+    }
+
+def conf(server: PluginServerInterface):
+    global config, settings
+    config = server.load_config_simple(
+        'config.json',
+        target_class=Config  #用Serializable
+    )
+    settings = config.settings
+
 
 class Here:
     def __init__(self, server: PluginServerInterface, info:Info):
