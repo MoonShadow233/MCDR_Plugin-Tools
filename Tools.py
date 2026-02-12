@@ -63,24 +63,33 @@ def on_load(server: PluginServerInterface, prev_module):
 
 def conf(server: PluginServerInterface):
     DefauleConf = {
-        'settings': {
-            'enable_here': True,
-            'enable_kill': True,
-            'enable_tp': True,
-            'enable_restart': True,
-            'enable_random': True,
-            'enable_fakeplayer': True,
-            'enable_manyplayer': True,
-            'enable_betterchat': True,
-            'enable_scale': True,
-            'enable_itemhighlight': True,
-            'enable_tools': True,
-            'enable_music': True
-        },
-        'message': {
-            'welcome_message': '§c欢迎 §a{player} §c加入游戏！'
+    "settings": {
+        "enable_here": true,
+        "enable_kill": true,
+        "enable_tp": true,
+        "enable_restart": true,
+        "enable_random": true,
+        "enable_fakeplayer": true,
+        "enable_manyplayer": true,
+        "enable_betterchat": true,
+        "enable_scale": true,
+        "enable_tools": false,
+        "enable_position": true,
+        "max_position": 100,
+        "position_permission_level": 2
+    },
+    "message": {
+        "welcome_message": "§c欢迎 §a{player} §c加入游戏！"
+    },
+    "Position": {
+        "例子": {
+            "location": "0 64 0",
+            "dimension": "0",
+            "by": "player"
+            
         }
     }
+}
     conf.config = server.load_config_simple(
         'config.json',
         DefauleConf
