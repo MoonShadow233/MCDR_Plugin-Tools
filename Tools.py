@@ -61,7 +61,6 @@ def on_load(server: PluginServerInterface, prev_module):
         return
     server.logger.info(f'{PLUGIN_NAME} 插件 加载成功 版本: {VERSION}')
 
-
 def on_unload(server: PluginServerInterface):
     ChatEvent(server, None, type="info", msg='插件已卸载', log='插件已卸载', say=False).guide()
 
@@ -207,6 +206,7 @@ class Kill:
             ChatEvent(self.server, info, type="info", msg=f'欸 {player_name} 你怎么似了啊？！', log=f"玩家 {player_name} 自杀", say=True).guide()
 
 class Position:
+    """位置保存与传送类"""
     def __init__(self, server: PluginServerInterface):
         self.server = server
     
@@ -218,7 +218,7 @@ class Position:
         """保存配置文件"""
         self.server.save_config_simple(config_data, 'config.json')
     
-    def getpositionlist(self, info: Info):
+    def getpositionlist(self, info: Info, page: int = 1):
         """获取所有保存的位置列表"""
         config_data = self._load_config()
         positions = config_data.get('Position', {})
@@ -235,16 +235,17 @@ class Position:
         total_pages = (len(items) + page_size - 1) // page_size
         
         for page in range(total_pages):
-            message = f'§a保存的传送位置有（第 {page + 1}/{total_pages} 页）：\n'
+            message = f'§a保存的传送位置有（第 {page + 1}/{total_pages} 页）：\n§r'
             start = page * page_size
             end = start + page_size
             for name, data in items[start:end]:
                 location = data.get('location', '?')
                 dimension = data.get('dimension', '?')
                 by = data.get('by', '?')
-                # 维度数字转文字
+
                 dim_text = self._dimension_to_text(dimension)
-                message += f'§6{name} §a- §2{location} §a- §4{dim_text} §a- §c{by}\n'
+
+                message += f'§r§6{name} §a- §r[§a{location}§r] §a- §c{dim_text} §a- §6{by}\n'
             ChatEvent(self.server, info, type="info", 
                      msg=message, 
                      log=f"获取传送位置列表第{page + 1}页", 
@@ -440,8 +441,6 @@ class Position:
                      log=f'删除失败，位置不存在: {name}', 
                      say=True).guide()
 
-
-
 class GamemodeTp():
     """
     旁观模式传送类
@@ -629,6 +628,7 @@ class GamemodeTp():
             return True
         else:           
             return False
+        
 class Restart():
     def __init__(self, server: PluginServerInterface, info: Info):
         self.server = server
@@ -1019,7 +1019,6 @@ class Music():
         else:
             self.help()
             return
-
 
 class ChatEvent():
     def __init__(self, server: PluginServerInterface, 
