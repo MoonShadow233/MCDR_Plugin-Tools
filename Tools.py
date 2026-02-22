@@ -206,15 +206,11 @@ class Kill:
             ChatEvent(self.server, info, type="info", msg=f'欸 {player_name} 你怎么似了啊？！', log=f"玩家 {player_name} 自杀", say=True).guide()
 
 class Position:
-<<<<<<< HEAD
-    """位置保存与传送类"""
-=======
     """
     传送位置管理类
     提供保存、传送、删除和查看传送点的功能
     """
     
->>>>>>> 15c636694b4aa37a848a5bffbaf4077a5dcf9d01
     def __init__(self, server: PluginServerInterface):
         """
         初始化 Position 类
@@ -239,18 +235,13 @@ class Position:
         """
         self.server.save_config_simple(config_data, 'config.json')
     
-<<<<<<< HEAD
     def getpositionlist(self, info: Info, page: int = 1):
-        """获取所有保存的位置列表"""
-=======
-    def getpositionlist(self, info: Info):
         """
         获取所有保存的位置列表
         使用 ListDisplay 显示可交互的分页列表
         
         :param info: Info 对象
         """
->>>>>>> 15c636694b4aa37a848a5bffbaf4077a5dcf9d01
         config_data = self._load_config()
         positions = config_data.get('Position', {})
         
