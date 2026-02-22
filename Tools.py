@@ -238,7 +238,6 @@ class Position:
     def getpositionlist(self, info: Info, page: int = 1, per_page: int = 5):
         """
         获取所有保存的位置列表
-        仿照 PrimeBackup list 实现的交互式分页
         支持点击翻页和操作按钮
         
         :param info: Info 对象
