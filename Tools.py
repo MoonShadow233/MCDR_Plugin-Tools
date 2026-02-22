@@ -206,20 +206,51 @@ class Kill:
             ChatEvent(self.server, info, type="info", msg=f'欸 {player_name} 你怎么似了啊？！', log=f"玩家 {player_name} 自杀", say=True).guide()
 
 class Position:
+<<<<<<< HEAD
     """位置保存与传送类"""
+=======
+    """
+    传送位置管理类
+    提供保存、传送、删除和查看传送点的功能
+    """
+    
+>>>>>>> 15c636694b4aa37a848a5bffbaf4077a5dcf9d01
     def __init__(self, server: PluginServerInterface):
+        """
+        初始化 Position 类
+        
+        :param server: PluginServerInterface 实例
+        """
         self.server = server
     
     def _load_config(self):
-        """加载配置文件"""
+        """
+        加载配置文件
+        
+        :return: 配置数据字典
+        """
         return self.server.load_config_simple('config.json')
     
     def _save_config(self, config_data):
-        """保存配置文件"""
+        """
+        保存配置文件
+        
+        :param config_data: 要保存的配置数据
+        """
         self.server.save_config_simple(config_data, 'config.json')
     
+<<<<<<< HEAD
     def getpositionlist(self, info: Info, page: int = 1):
         """获取所有保存的位置列表"""
+=======
+    def getpositionlist(self, info: Info):
+        """
+        获取所有保存的位置列表
+        使用 ListDisplay 显示可交互的分页列表
+        
+        :param info: Info 对象
+        """
+>>>>>>> 15c636694b4aa37a848a5bffbaf4077a5dcf9d01
         config_data = self._load_config()
         positions = config_data.get('Position', {})
         
@@ -252,7 +283,12 @@ class Position:
                      say=True).guide()
     
     def posdebug(self, info: Info):
-        """显示帮助信息"""
+        """
+        显示帮助信息
+        当用户输入命令格式错误时调用
+        
+        :param info: Info 对象
+        """
         ChatEvent(self.server, info, type="info", msg=(
             '§c语法错误！正确语法：!d tp <位置名称> | !d set <位置名称> | !d list\n'
             '§c- !d set <名称> : 保存当前位置\n'
@@ -263,7 +299,9 @@ class Position:
     def set_position(self, info: Info):
         """
         设置/传送位置主方法
-        :param info: 服务器信息对象
+        根据命令参数分发到不同的子方法
+        
+        :param info: Info 对象
         """
         if not info.is_player or not info.content.startswith('!d'):
             return
@@ -285,7 +323,12 @@ class Position:
             self.posdebug(info)
     
     def _teleport_to_position(self, info: Info, args: list):
-        """传送到保存的位置"""
+        """
+        传送到保存的位置
+        
+        :param info: Info 对象
+        :param args: 命令参数列表
+        """
         if len(args) < 3:
             self.posdebug(info)
             return
@@ -333,7 +376,12 @@ class Position:
     
     @new_thread("SetPosition")
     def set_location(self, info: Info):
-        """保存当前位置"""
+        """
+        保存当前位置
+        获取玩家当前坐标和维度，保存到配置文件
+        
+        :param info: Info 对象
+        """
         args = info.content.split()
         if len(args) < 3:
             self.posdebug(info)
@@ -394,7 +442,12 @@ class Position:
                      say=False).guide()
     
     def _dimension_to_text(self, dimension_id):
-        """维度ID转显示文本"""
+        """
+        维度ID转显示文本
+        
+        :param dimension_id: 维度ID (0=主世界, -1=下界, 1=末地)
+        :return: 维度中文名称
+        """
         dimension_map = {
             0: '主世界',
             -1: '下界',
@@ -406,7 +459,13 @@ class Position:
         return dimension_map.get(dimension_id, f'未知({dimension_id})')
     
     def _dimension_to_command(self, dimension_id):
-        """维度ID转命令维度名"""
+        """
+        维度ID转命令维度名
+        用于 execute in <dimension> 命令
+        
+        :param dimension_id: 维度ID
+        :return: Minecraft 命令使用的维度名称
+        """
         dimension_map = {
             0: 'minecraft:overworld',
             -1: 'minecraft:the_nether',
@@ -418,7 +477,13 @@ class Position:
         return dimension_map.get(dimension_id, 'minecraft:overworld')
     
     def delete_position(self, info: Info, name: str):
-        """删除保存的位置（需要权限）"""
+        """
+        删除保存的位置
+        需要权限等级 >= 3
+        
+        :param info: Info 对象
+        :param name: 要删除的位置名称
+        """
         perm = self.server.get_permission_level(info.player)
         if perm < 3:
             ChatEvent(self.server, info, type="error", 
