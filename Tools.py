@@ -235,12 +235,15 @@ class Position:
         """
         self.server.save_config_simple(config_data, 'config.json')
     
-    def getpositionlist(self, info: Info, page: int = 1):
+    def getpositionlist(self, info: Info, page: int = 1, per_page: int = 5):
         """
         获取所有保存的位置列表
-        使用 ListDisplay 显示可交互的分页列表
+        仿照 PrimeBackup list 实现的交互式分页
+        支持点击翻页和操作按钮
         
         :param info: Info 对象
+        :param page: 当前页码
+        :param per_page: 每页显示数量
         """
         config_data = self._load_config()
         positions = config_data.get('Position', {})
@@ -252,26 +255,98 @@ class Position:
                      say=True).guide()
             return
         
-        page_size = 5
         items = list(positions.items())
-        total_pages = (len(items) + page_size - 1) // page_size
+        total_count = len(items)
+        max_page = max(1, (total_count - 1) // per_page + 1)
         
-        for page in range(total_pages):
-            message = f'§a保存的传送位置有（第 {page + 1}/{total_pages} 页）：\n§r'
-            start = page * page_size
-            end = start + page_size
-            for name, data in items[start:end]:
-                location = data.get('location', '?')
-                dimension = data.get('dimension', '?')
-                by = data.get('by', '?')
-
-                dim_text = self._dimension_to_text(dimension)
-
-                message += f'§r§6{name} §a- §r[§a{location}§r] §a- §c{dim_text} §a- §6{by}\n'
-            ChatEvent(self.server, info, type="info", 
-                     msg=message, 
-                     log=f"获取传送位置列表第{page + 1}页", 
-                     say=True).guide()
+        if not (1 <= page <= max_page):
+            out_of_range_msg = RText(f'页码 {page} 超出范围 (1-{max_page})', RColor.gray).set_styles(RStyle.italic)
+            self.server.tell(info.player, out_of_range_msg)
+            page = max(1, min(page, max_page))
+        
+        title = RTextList(
+            RText('========== ', RColor.gray),
+            RText('传送位置列表', RColor.gold),
+            RText(' ==========', RColor.gray)
+        )
+        self.server.tell(info.player, title)
+        
+        count_text = RTextList(
+            RText('共有 ', RColor.gray),
+            RText(str(total_count), RColor.yellow),
+            RText(' 个位置', RColor.gray)
+        )
+        self.server.tell(info.player, count_text)
+        
+        start = (page - 1) * per_page
+        end = start + per_page
+        page_items = items[start:end]
+        
+        for name, data in page_items:
+            location = data.get('location', '?')
+            dimension = data.get('dimension', '?')
+            by = data.get('by', '?')
+            dim_text = self._dimension_to_text(dimension)
+            
+            name_text = RText(name, RColor.gold).h(f'位置名称: {name}')
+            
+            tp_button = RText('[传送]', RColor.green)
+            tp_button.h(f'点击传送到 {name}')
+            tp_button.c(RAction.run_command, f'!d tp {name}')
+            
+            del_button = RText('[删除]', RColor.red)
+            del_button.h(f'点击删除 {name}')
+            del_button.c(RAction.suggest_command, f'!d del {name}')
+            
+            item_line = RTextList(
+                name_text,
+                RText(' - ', RColor.gray),
+                RText(f'[{location}]', RColor.aqua),
+                RText(' - ', RColor.gray),
+                RText(dim_text, RColor.light_purple),
+                RText(' - ', RColor.gray),
+                RText(f'by {by}', RColor.yellow),
+                RText(' ', RColor.gray),
+                tp_button,
+                RText(' ', RColor.gray),
+                del_button
+            )
+            self.server.tell(info.player, item_line)
+        
+        prev_btn = RText('<-')
+        if 1 <= page - 1 <= max_page:
+            prev_btn.h('上一页').c(RAction.run_command, self.__make_pos_list_command(page - 1, per_page))
+        else:
+            prev_btn.set_color(RColor.dark_gray)
+        
+        next_btn = RText('->')
+        if 1 <= page + 1 <= max_page:
+            next_btn.h('下一页').c(RAction.run_command, self.__make_pos_list_command(page + 1, per_page))
+        else:
+            next_btn.set_color(RColor.dark_gray)
+        
+        nav_line = RTextList(
+            RText('---- ', RColor.gray),
+            prev_btn,
+            RText(' [', RColor.gray),
+            RText(str(page), RColor.yellow),
+            RText('/', RColor.gray),
+            RText(str(max_page), RColor.yellow),
+            RText('] ', RColor.gray),
+            next_btn,
+            RText(' ----', RColor.gray)
+        )
+        self.server.tell(info.player, nav_line)
+    
+    def __make_pos_list_command(self, page: int, per_page: int) -> str:
+        """
+        生成翻页命令字符串
+        
+        :param page: 目标页码
+        :param per_page: 每页数量
+        :return: 完整的命令字符串
+        """
+        return f'!d list {page}'
     
     def posdebug(self, info: Info):
         """
@@ -309,7 +384,13 @@ class Position:
         elif mode == 'set':
             self.set_location(info)
         elif mode == 'list':
-            self.getpositionlist(info)
+            page = 1
+            if len(args) >= 3:
+                try:
+                    page = int(args[2])
+                except ValueError:
+                    pass
+            self.getpositionlist(info, page)
         else:
             self.posdebug(info)
     
