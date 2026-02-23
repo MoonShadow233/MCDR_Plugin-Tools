@@ -1,17 +1,18 @@
 {
-  "id": "tools",
-  "authors": [
-    {
-      "name": "MoonShadow233",
-      "link": "https://github.com/MoonShadow233"
-    }
-  ],
-  "repository": "https://github.com/MoonShadow233/MCDR_Plugin-Tools",
-  "branch": "master",
-  "related_path": ".",
-  "labels": ["tool", "management"],
-  "introduction": {
-    "en_us": "README.md",
-    "zh_cn": "README_CN.md"
-  }
+  "id": "N_tools_in_one",
+  "version": "1.0.2",
+  "name": "Tools",
+  "description": "A useful tools plugin for MCDR",
+  "author": "MoonShadow233",
+  "link": "https://github.com/MoonShadow233/MCDR_Plugin-Tools",
+  "dependencies": {
+    "mcdreforged": ">=2.15.4",
+    "minecraft_data_api": "*",
+    "online_player_api": "*"
+  },
+  "entrypoint": "Tools.py",
+  "resources": [
+    "README.md",
+    "config.json"
+  ]
 }
