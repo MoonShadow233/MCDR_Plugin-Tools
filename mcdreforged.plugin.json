@@ -1,7 +1,7 @@
 {
   "id": "N_tools_in_one",
-  "version": "1.0.2",
-  "name": "Tools",
+  "version": "1.1.2",
+  "name": "N_tools_in_one",
   "description": "Integrated MCDR tool plugin offering multiple practical features: teleport management, coordinate sharing, fake player generation, random number, music playback, item highlighting, player @mentions and more",
   "author": "MoonShadow233",
   "link": "https://github.com/MoonShadow233/MCDR_Plugin-Tools",
