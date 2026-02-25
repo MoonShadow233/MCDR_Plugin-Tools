@@ -411,7 +411,7 @@ class Position:
             
             dim_text = self._dimension_to_text(dimension_id)
             ChatEvent(self.server, info, type="info", 
-                     msg=f'§a已将你传送到 §6{location_name} §a({dim_text})', 
+                     msg=f'§a已{info.player}将传送到 §6{location_name} §a({dim_text})', 
                      log=f"玩家 {info.player} 传送到 {location_name}", 
                      say=True).guide()
             
