@@ -16,8 +16,8 @@ import random
 
 # 如果发现了bug欢迎在git提交issues
 
-PLUGIN_ID = 'tools'
-PLUGIN_NAME = 'Tools'
+
+PLUGIN_NAME = 'survival_crafting_tools'
 VERSION = '1.2.0'
 IS_MCDR_COMMAND_FABRIC = False
 
