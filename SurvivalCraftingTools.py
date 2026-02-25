@@ -1,9 +1,6 @@
 from mcdreforged.api.all import *
 import time
 import random
-#这些东西并没有什么参考价值
-#一堆石山罢了
-#如果发现了bug也欢迎在git提交issus
 # Tools.py - MCDReforged 插件，提供多种服务器管理功能
 # Copyright (C) 2024 MoonShadow233, Fashiye_xico
 #
@@ -12,14 +9,12 @@ import random
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# 本文件包含来自 PrimeBackup 的修改代码，
+# 原作者 TISUnion，遵循 LGPL-3.0 协议。
+# 原项目地址：https://github.com/TISUnion/PrimeBackup
 
+
+# 如果发现了bug欢迎在git提交issues
 
 PLUGIN_ID = 'tools'
 PLUGIN_NAME = 'Tools'
