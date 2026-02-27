@@ -1,3 +1,4 @@
+from typing import Any
 from mcdreforged.api.all import *
 import time
 import random
@@ -307,12 +308,11 @@ class Position:
         )
         self.server.tell(info.player, nav_line)
     
-    def __make_pos_list_command(self, page: int, per_page: int) -> str:
+    def __make_pos_list_command(self, page: int) -> str:
         """
         生成翻页命令字符串
         
         :param page: 目标页码
-        :param per_page: 每页数量
         :return: 完整的命令字符串
         """
         return f'!d list {page}'
