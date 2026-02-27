@@ -205,7 +205,7 @@ class Position:
         """
         self.server.save_config_simple(config_data, 'config.json')
     
-    def getpositionlist(self, info: Info, page: int = 1, per_page: int = 5):
+    def getpositionlist(self, info: Info, page: int = 1, per_page: int = 12):
         """
         获取所有保存的位置列表
         支持点击翻页和操作按钮
@@ -411,7 +411,7 @@ class Position:
             
             dim_text = self._dimension_to_text(dimension_id)
             ChatEvent(self.server, info, type="info", 
-                     msg=f'§a已{info.player}将传送到 §6{location_name} §a({dim_text})', 
+                     msg=f'§a已将 {info.player} 传送到 §6{location_name} §a({dim_text})', 
                      log=f"玩家 {info.player} 传送到 {location_name}", 
                      say=True).guide()
             
@@ -826,7 +826,7 @@ class ManyPlayer():
         try:
             for i in range(player_num):
                 # 直接在玩家位置生成假人
-                self.server.execute(f'execute at {info.player} run player FakePlayer{i} spawn')
+                self.server.execute(f'execute as {info.player} at @s run player FakePlayer{i} spawn')
                 
                 if sleep > 0:
                     time.sleep(sleep)
@@ -898,38 +898,6 @@ class ManyPlayer():
                 
             # 直接生成，没有延迟
             self.SpawnPlayer(info, player_num, sleep=0)
-            
-        # 兼容旧的 slow 命令
-        elif args[1] == 'slow':
-            if len(args) < 3:
-                ChatEvent(self.server, info, type="error", msg='§c语法错误：!mp slow <数量>', log='!mp slow 参数不足', say=False).guide()
-                return
-                
-            try:
-                player_num = int(args[2])
-            except ValueError:
-                ChatEvent(self.server, info, type="error", msg='§c玩家数量必须是一个整数！', log='!mp 参数错误', say=False).guide()
-                return
-            
-            # 权限检查
-            try:
-                permission_level = self.server.get_permission_level(info.player)
-            except:
-                permission_level = 0
-                
-            if permission_level < 1 and player_num > 20:
-                ChatEvent(self.server, info, type="error", msg='§c你没有足够的权限创建超过20个假人！', log='权限不足', say=False).guide()
-                return
-            elif permission_level < 2 and player_num > 50:
-                ChatEvent(self.server, info, type="error", msg='§c你没有足够的权限创建超过50个假人！', log='权限不足', say=False).guide()
-                return
-            elif player_num > 256:
-                ChatEvent(self.server, info, type="error", msg='§c最多只能创建256个假人！', log='假人数量超限', say=False).guide()
-                return
-                
-            # slow 模式有1秒延迟
-            self.SpawnPlayer(info, player_num, sleep=1)
-            
         else:
             ChatEvent(self.server, info, type="error", msg='§c未知的子命令！可用: kill, cmd, spawn', log='!mp 未知子命令', say=False).guide()
 
@@ -1122,12 +1090,12 @@ class Music():
                     ChatEvent(self.server, self.info, type="warn", msg=f"§c未找到名为 {music_name} 的音乐！可用音乐：{music_dict.keys()}...", log=f"未找到音乐: {music_name}", say=False).guide()
                     return
                 music_id = music_dict[music_name]
-                self.server.execute(f'execute at @a run playsound {music_id} player @a')
+                self.server.execute(f'execute as @a at @s run playsound {music_id} ui @a ~ ~ ~ 1 1 1')
                 ChatEvent(self.server, self.info, type="info", msg=f'§a正在为所有玩家播放: {music_name}', log=f'播放音乐: {music_name}', say=False).guide()
                 
             elif args[2] == 'id':
                 music_id = args[3]
-                self.server.execute(f'execute at @a run playsound {music_id} player @a')
+                self.server.execute(f'execute as @a at @s run playsound {music_id} ui @a ~ ~ ~ 1 1 1')
                 ChatEvent(self.server, self.info, type="info", msg=f'§a正在为所有玩家播放音乐ID: {music_id}', log=f'播放音乐ID: {music_id}', say=False).guide()
             else:
                 self.help()
