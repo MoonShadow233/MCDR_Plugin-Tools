@@ -97,62 +97,62 @@ def register_tools_commands(server: PluginServerInterface):
     
     # !h / !here - 发送当前位置
     if settings.get('enable_here', True):
-        def on_here_command(server: PluginServerInterface, info: Info):
-            Here(server, info).GetPos()
+        def on_here_command(context: CommandContext):
+            Here(context.source.get_server(), context).GetPos()
         server.register_command(Literal('!!h').runs(on_here_command))
         server.register_command(Literal('!!here').runs(on_here_command))
     
     # !kill - 自杀
     if settings.get('enable_kill', True):
-        def on_kill_command(server: PluginServerInterface, info: Info):
-            Kill(server).kill(info)
+        def on_kill_command(context: CommandContext):
+            Kill(context.source.get_server()).kill(context)
         server.register_command(Literal('!!kill').runs(on_kill_command))
     
     # !d - 位置管理
     if settings.get('enable_position', True):
-        def on_position_command(server: PluginServerInterface, info: Info):
-            Position(server).set_position(info)
+        def on_position_command(context: CommandContext):
+            Position(context.source.get_server()).set_position(context)
         server.register_command(Literal('!!d').runs(on_position_command))
     
     # !tp - 旁观模式传送
     if settings.get('enable_tp', True):
-        def on_tp_command(server: PluginServerInterface, info: Info):
-            GamemodeTp(server).get_player_info(info)
+        def on_tp_command(context: CommandContext):
+            GamemodeTp(context.source.get_server()).get_player_info(context)
         server.register_command(Literal('!!tp').runs(on_tp_command))
     
     # !restart - 重启服务器
     if settings.get('enable_restart', True):
-        def on_restart_command(server: PluginServerInterface, info: Info):
-            Restart(server).restart(info)
+        def on_restart_command(context: CommandContext):
+            Restart(context.source.get_server()).restart(context)
         server.register_command(Literal('!!restart').runs(on_restart_command))
     
     # !l - 随机数
     if settings.get('enable_random', True):
-        def on_random_command(server: PluginServerInterface, info: Info):
-            Random(server).ListNumber(info)
+        def on_random_command(context: CommandContext):
+            Random(context.source.get_server()).ListNumber(context)
         server.register_command(Literal('!!l').runs(on_random_command))
     
     # !mp - 假人管理
     if settings.get('enable_manyplayer', True):
-        def on_manyplayer_command(server: PluginServerInterface, info: Info):
-            ManyPlayer(server).ManyPlayer(info)
+        def on_manyplayer_command(context: CommandContext):
+            ManyPlayer(context.source.get_server()).ManyPlayer(context)
         server.register_command(Literal('!!mp').runs(on_manyplayer_command))
     
     # !sc - 玩家缩放
     if settings.get('enable_scale', True):
-        def on_scale_command(server: PluginServerInterface, info: Info):
-            Scale(server).scale(info)
+        def on_scale_command(context: CommandContext):
+            Scale(context.source.get_server()).scale(context)
         server.register_command(Literal('!!sc').runs(on_scale_command))
     
     # !itemhl / !uitemhl - 物品高亮
     if settings.get('enable_itemhighlight', True):
-        def on_itemhl_command(server: PluginServerInterface, info: Info):
-            ItemHL(server).highlight_item(info)
+        def on_itemhl_command(context: CommandContext):
+            ItemHL(context.source.get_server()).highlight_item(context)
         server.register_command(Literal('!!itemhl').runs(on_itemhl_command))
         server.register_command(Literal('!!uitemhl').runs(on_itemhl_command))
     
     # !music - 音乐播放
     if settings.get('enable_music', True):
-        def on_music_command(server: PluginServerInterface, info: Info):
-            Music(server, info).PlayMusic()
+        def on_music_command(context: CommandContext):
+            Music(context.source.get_server(), context).PlayMusic()
         server.register_command(Literal('!!music').runs(on_music_command))

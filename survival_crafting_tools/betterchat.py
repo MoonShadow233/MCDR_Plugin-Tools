@@ -9,14 +9,14 @@ class BetterChat:
     @new_thread("BetterChat")
     def process_chat(self, info: Info):
         """处理聊天消息中的@功能"""
-        if not info.source.is_player or '@' not in info.content:
+        if not info.is_player or '@' not in info.content:
             return
         if 'Command' in info.content:
             return
-        if info.source.player == "Server":
+        if info.player == "Server":
             return
         content = info.content
-        player = info.source.player
+        player = info.player
         words = content.split()
         
         api = self.server.get_plugin_instance('minecraft_data_api')
