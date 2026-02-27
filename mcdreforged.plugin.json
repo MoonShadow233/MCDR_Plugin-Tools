@@ -10,7 +10,7 @@
     "minecraft_data_api": "*",
     "online_player_api": "*"
   },
-  "entrypoint": "survival_crafting_tools.py",
+  "entrypoint": "survival_crafting_tools",
   "resources": [
     "README.md",
     "config.json",
