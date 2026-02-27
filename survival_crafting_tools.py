@@ -1,5 +1,6 @@
 from typing import Any
 from mcdreforged.api.all import *
+from mcdreforged.api.rtext import RText, RTextList, RColor, RAction
 import time
 import random
 # Tools.py - MCDReforged 插件，提供多种服务器管理功能
@@ -163,8 +164,24 @@ class Here:
             
         ChatEvent(self.server, None, type="info", msg=message, log=f"[HerePlugin] {message}", say=True).guide()
         
-        tellraw_cmd = f'tellraw @a [{{"text":"[",color:dark_gray}},{{"text":"Tools",color:dark_green}},{{"text":"] ",color:dark_gray}},{{"text":"[旁观TP坐标]",color:gold,click_event:{{action:suggest_command,command:"!tp {x} {y} {z}"}},hover_event:{{action:show_text,value:{{text:"Tools插件的TP功能"}}}}}},{{"text":"   "}},{{"bold":true,"text":"[+H]",click_event:{{action:run_command,command:"/highlight {x} {y} {z}"}},hover_event:{{action:show_text,value:{{text:"使用Carpet Org的高亮功能"}}}},color:yellow}},{{"text":"   "}},{{"text":"[+C]",color:yellow,bold:true,hover_event:{{action:show_text,value:{{text:"复制坐标"}}}},click_event:{{action:copy_to_clipboard,value:"{x} {y} {z}"}}}}]'
-        self.server.execute(tellraw_cmd)
+        buttons = RTextList(
+            RText('[', RColor.dark_gray),
+            RText('Tools', RColor.dark_green),
+            RText('] ', RColor.dark_gray),
+            RText('[旁观TP坐标]', RColor.gold)
+                .h('Tools插件的TP功能')
+                .c(RAction.suggest_command, f'!tp {x} {y} {z}'),
+            RText('   '),
+            RText('[+H]', RColor.yellow).set_bold(True)
+                .h('使用Carpet Org的高亮功能')
+                .c(RAction.run_command, f'/highlight {x} {y} {z}'),
+            RText('   '),
+            RText('[+C]', RColor.yellow).set_bold(True)
+                .h('复制坐标')
+                .c(RAction.copy_to_clipboard, f'{x} {y} {z}')
+        )
+        
+        self.server.tell(info.player, buttons)
 
 class Kill:
     def __init__(self, server: PluginServerInterface):
@@ -325,7 +342,7 @@ class Position:
         :param info: Info 对象
         """
         ChatEvent(self.server, info, type="info", msg=(
-            '§c语法错误！正确语法：!d tp <位置名称> | !d set <位置名称> | !d list\n'
+            '§c语法错误!正确语法：!d tp <位置名称> | !d set <位置名称> | !d list\n'
             '§c- !d set <名称> : 保存当前位置\n'
             '§c- !d tp <名称> : 传送到保存的位置\n'
             '§c- !d list : 查看所有保存的位置\n'
@@ -449,7 +466,7 @@ class Position:
         api = self.server.get_plugin_instance('minecraft_data_api')
         if api is None:
             ChatEvent(self.server, info, type="error", 
-                     msg='§cMinecraft Data API未启用！', 
+                     msg='§cMinecraft Data API未启用!', 
                      log='Minecraft Data API 未启用', 
                      say=False).guide()
             return
@@ -534,7 +551,7 @@ class Position:
         perm = self.server.get_permission_level(info.player)
         if perm < 3:
             ChatEvent(self.server, info, type="error", 
-                     msg='§c你没有权限删除位置！', 
+                     msg='§c你没有权限删除位置!', 
                      log='权限不足', 
                      say=False).guide()
             return
