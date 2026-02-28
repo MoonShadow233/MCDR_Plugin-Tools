@@ -9,17 +9,15 @@
         "enable_manyplayer": true,
         "enable_betterchat": true,
         "enable_scale": true,
-        "enable_tools": true
+        "enable_itemhighlight": true,
+        "enable_tools": true,
+        "enable_position": true,
+        "enable_music": true,
+        "max_position": 100,
+        "position_permission_level": 2
     },
     "message": {
         "welcome_message": "§c欢迎 §a{player} §c加入游戏！"
     },
-    "Position": {
-        "name": {
-            "location": "0 0 0",
-            "dimension": 0,
-            "by": "player",
-            "time": "1145-01-04 23:33:33"
-        }
-    }
+    "Position": {}
 }

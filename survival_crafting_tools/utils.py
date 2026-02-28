@@ -1,53 +1,23 @@
 from mcdreforged.api.all import *
-
-
-music_dict = {
-    'creative': 'minecraft:music.creative',
-    'credits': 'minecraft:music.credits',
-    'end': 'minecraft:music.end',
-    'game': 'minecraft:music.game',
-    'dragon': 'minecraft:music.dragon',
-    'menu': 'minecraft:music.menu',
-    'nether': 'minecraft:music.nether',
-    '11': 'minecraft:music_disc.11',
-    '13': 'minecraft:music_disc.13',
-    '5': 'minecraft:music_disc.5',
-    'blocks': 'minecraft:music_disc.blocks',
-    'cat': 'minecraft:music_disc.cat',
-    'chirp': 'minecraft:music_disc.chirp',
-    'far': 'minecraft:music_disc.far',
-    'mall': 'minecraft:music_disc.mall',
-    'creator': 'minecraft:music_disc.creator',
-    'creator_music_box': 'minecraft:music_disc.creator_music_box',
-    'lava_chicken': 'minecraft:music_disc.lava_chicken',
-    'mellohi': 'minecraft:music_disc.mellohi',
-    'otherside': 'minecraft:music_disc.otherside',
-    'pigstep': 'minecraft:music_disc.pigstep',
-    'precipice': 'minecraft:music_disc.precipice',
-    'relic': 'minecraft:music_disc.relic',
-    'stal': 'minecraft:music_disc.stal',
-    'strad': 'minecraft:music_disc.strad',
-    'tears': 'minecraft:music_disc.tears',
-    'wait': 'minecraft:music_disc.wait',
-    'ward': 'minecraft:music_disc.ward'
-}
+from .tools import get_command_source, get_player_name
 
 
 class ChatEvent:
     def __init__(self, server: PluginServerInterface, 
-                 info: Info = None, 
+                 source=None, 
                  type: str = None, 
                  log: str = None, 
                  msg: str = None, 
                  say: bool = False):
         """
+        - source: Can be Info, CommandSource, or CommandContext
         - type: <info|error|warn|help>
         - log: 需要发送到服务器控制台的日志信息
         - msg: 需要发送给玩家的消息
         - say: 是否使用say命令发送消息而不是tell命令
         """
         self.server = server
-        self.info = info
+        self.source = source
 
         self.SendMsg = "§8[§2Tools§8] §r"
         self.SendLog = "§8[§2Tools§8] §r"
@@ -94,14 +64,16 @@ class ChatEvent:
             if say:
                 self.server.say(send_msg)
             else:
-                if self.info and self.info.source.is_player:
-                    self.server.tell(self.info.source.player, send_msg)
+                player_name = get_player_name(self.source)
+                if player_name:
+                    self.server.tell(player_name, send_msg)
                     
         if send_log is not None:
             self.server.logger.info(send_log)
 
     def help(self):
-        if not self.info or not getattr(self.info.source, "is_player", False) or self.info.content != '!tools':
+        player_name = get_player_name(self.source)
+        if not player_name:
             return
             
         helpmsg = "§e[Help] §r- "
@@ -113,4 +85,36 @@ class ChatEvent:
         helpmsg += "├─ §c!l §r- 投骰子\n"
         helpmsg += "├─ §c!sc §r- 玩家大小缩放\n"
         helpmsg += "└─ §c!music §r- 音乐播放帮助"
-        self.server.tell(self.info.source.player, helpmsg)
+        self.server.tell(player_name, helpmsg)
+
+
+music_dict = {
+    'creative': 'minecraft:music.creative',
+    'credits': 'minecraft:music.credits',
+    'end': 'minecraft:music.end',
+    'game': 'minecraft:music.game',
+    'dragon': 'minecraft:music.dragon',
+    'menu': 'minecraft:music.menu',
+    'nether': 'minecraft:music.nether',
+    '11': 'minecraft:music_disc.11',
+    '13': 'minecraft:music_disc.13',
+    '5': 'minecraft:music_disc.5',
+    'blocks': 'minecraft:music_disc.blocks',
+    'cat': 'minecraft:music_disc.cat',
+    'chirp': 'minecraft:music_disc.chirp',
+    'far': 'minecraft:music_disc.far',
+    'mall': 'minecraft:music_disc.mall',
+    'creator': 'minecraft:music_disc.creator',
+    'creator_music_box': 'minecraft:music_disc.creator_music_box',
+    'lava_chicken': 'minecraft:music_disc.lava_chicken',
+    'mellohi': 'minecraft:music_disc.mellohi',
+    'otherside': 'minecraft:music_disc.otherside',
+    'pigstep': 'minecraft:music_disc.pigstep',
+    'precipice': 'minecraft:music_disc.precipice',
+    'relic': 'minecraft:music_disc.relic',
+    'stal': 'minecraft:music_disc.stal',
+    'strad': 'minecraft:music_disc.strad',
+    'tears': 'minecraft:music_disc.tears',
+    'wait': 'minecraft:music_disc.wait',
+    'ward': 'minecraft:music_disc.ward'
+}

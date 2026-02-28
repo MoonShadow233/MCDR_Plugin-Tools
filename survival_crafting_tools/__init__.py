@@ -1,43 +1,25 @@
 from mcdreforged.api.all import *
-from typing import Any
-from .here import Here
-from .kill import Kill
-from .position import Position
-from .gamemodetp import GamemodeTp
-from .restart import Restart
-from .random import Random
-from .manyplayer import ManyPlayer
-from .betterchat import BetterChat
-from .scale import Scale
-from .itemhl import ItemHL
-from .music import Music
-from .utils import ChatEvent, music_dict
+from .utils import ChatEvent
 
 PLUGIN_NAME = 'survival_crafting_tools'
 VERSION = '1.2.0'
-IS_MCDR_COMMAND_FABRIC = False
 
 settings = {}
 config = {}
-IssueUrl = ""
-GithubUrl = ""
 
 def on_load(server: PluginServerInterface, prev_module):
-    global IssueUrl, GithubUrl, PLUGIN_ENABLED, settings, config
-    
-    IssueUrl = "https://github.com/MoonShadow233/MCDR_Plugin-Tools/issues"
-    GithubUrl = "https://github.com/MoonShadow233/MCDR_Plugin-Tools"
+    global settings, config
     
     conf(server)
     
     PLUGIN_ENABLED = settings.get('enable_tools', False)
     if PLUGIN_ENABLED:
         ChatEvent(server, None, type="info", msg=f'§aTools插件{VERSION} by MoonShadow233 加载成功', say=True).guide()
-        register_tools_commands(server)
+        register_commands(server)
     else:
         ChatEvent(server, None, type="info", msg='====================================================', say=True).guide()
         ChatEvent(server, None, type="info", msg=f'§cTools插件被禁用!版本：{VERSION}', say=True).guide()
-        ChatEvent(server, None, type="info", msg=f'§c在{GithubUrl}阅读插件使用说明！', say=True).guide()
+        ChatEvent(server, None, type="info", msg='§c在 https://github.com/MoonShadow233/MCDR_Plugin-Tools 阅读插件使用说明！', say=True).guide()
         ChatEvent(server, None, type="info", msg='====================================================', say=True).guide()
         return
     server.logger.info(f'{PLUGIN_NAME} 插件 加载成功 版本: {VERSION}')
@@ -51,8 +33,8 @@ def on_info(server: PluginServerInterface, info: Info):
     if info.content is None or not settings.get('enable_tools', True):
         return
     
-    # BetterChat
     if settings.get('enable_betterchat', True):
+        from .betterchat import BetterChat
         BetterChat(server).process_chat(info)
 
 class Config(Serializable):
@@ -76,13 +58,7 @@ class Config(Serializable):
     message: dict = {
         'welcome_message': '§c欢迎 §a{player} §c加入游戏！'
     }
-    Position: dict = {
-        "name": {
-            "location": "0 64 0",
-            "dimension": "0",
-            "by": "player"
-        }
-    }
+    Position: dict = {}
 
 def conf(server: PluginServerInterface):
     global config, settings
@@ -92,67 +68,45 @@ def conf(server: PluginServerInterface):
     )
     settings = config.settings
 
-def register_tools_commands(server: PluginServerInterface):
+def register_commands(server: PluginServerInterface):
     global settings
     
-    # !h / !here - 发送当前位置
     if settings.get('enable_here', True):
-        def on_here_command(context: CommandContext):
-            Here(context.source.get_server(), context).GetPos()
-        server.register_command(Literal('!!h').runs(on_here_command))
-        server.register_command(Literal('!!here').runs(on_here_command))
+        from .here import register as register_here
+        register_here(server)
     
-    # !kill - 自杀
     if settings.get('enable_kill', True):
-        def on_kill_command(context: CommandContext):
-            Kill(context.source.get_server()).kill(context)
-        server.register_command(Literal('!!kill').runs(on_kill_command))
+        from .kill import register as register_kill
+        register_kill(server)
     
-    # !d - 位置管理
     if settings.get('enable_position', True):
-        def on_position_command(context: CommandContext):
-            Position(context.source.get_server()).set_position(context)
-        server.register_command(Literal('!!d').runs(on_position_command))
+        from .position import register as register_position
+        register_position(server)
     
-    # !tp - 旁观模式传送
     if settings.get('enable_tp', True):
-        def on_tp_command(context: CommandContext):
-            GamemodeTp(context.source.get_server()).get_player_info(context)
-        server.register_command(Literal('!!tp').runs(on_tp_command))
+        from .gamemodetp import register as register_tp
+        register_tp(server)
     
-    # !restart - 重启服务器
     if settings.get('enable_restart', True):
-        def on_restart_command(context: CommandContext):
-            Restart(context.source.get_server()).restart(context)
-        server.register_command(Literal('!!restart').runs(on_restart_command))
+        from .restart import register as register_restart
+        register_restart(server)
     
-    # !l - 随机数
     if settings.get('enable_random', True):
-        def on_random_command(context: CommandContext):
-            Random(context.source.get_server()).ListNumber(context)
-        server.register_command(Literal('!!l').runs(on_random_command))
+        from .random import register as register_random
+        register_random(server)
     
-    # !mp - 假人管理
     if settings.get('enable_manyplayer', True):
-        def on_manyplayer_command(context: CommandContext):
-            ManyPlayer(context.source.get_server()).ManyPlayer(context)
-        server.register_command(Literal('!!mp').runs(on_manyplayer_command))
+        from .manyplayer import register as register_manyplayer
+        register_manyplayer(server)
     
-    # !sc - 玩家缩放
     if settings.get('enable_scale', True):
-        def on_scale_command(context: CommandContext):
-            Scale(context.source.get_server()).scale(context)
-        server.register_command(Literal('!!sc').runs(on_scale_command))
+        from .scale import register as register_scale
+        register_scale(server)
     
-    # !itemhl / !uitemhl - 物品高亮
     if settings.get('enable_itemhighlight', True):
-        def on_itemhl_command(context: CommandContext):
-            ItemHL(context.source.get_server()).highlight_item(context)
-        server.register_command(Literal('!!itemhl').runs(on_itemhl_command))
-        server.register_command(Literal('!!uitemhl').runs(on_itemhl_command))
+        from .itemhl import register as register_itemhl
+        register_itemhl(server)
     
-    # !music - 音乐播放
     if settings.get('enable_music', True):
-        def on_music_command(context: CommandContext):
-            Music(context.source.get_server(), context).PlayMusic()
-        server.register_command(Literal('!!music').runs(on_music_command))
+        from .music import register as register_music
+        register_music(server)
