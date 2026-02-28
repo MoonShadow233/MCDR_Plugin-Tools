@@ -7,7 +7,7 @@ VERSION = '1.2.0'
 settings = {}
 config = {}
 
-def on_load(server: PluginServerInterface, prev_module):
+def on_load(server: PluginServerInterface):
     global settings, config
     
     conf(server)
